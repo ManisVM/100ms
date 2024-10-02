@@ -1,0 +1,80 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'checkstyle'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // TestNG for testing
+    testImplementation 'org.testng:testng:6.9.10'
+
+    // Apache POI for working with Excel files
+    implementation 'org.apache.poi:poi-ooxml:4.1.2'
+
+    // WebDriverManager for managing WebDriver binaries
+    implementation 'io.github.bonigarcia:webdrivermanager:5.5.3'
+
+    // Selenium for browser automation
+    implementation 'org.seleniumhq.selenium:selenium-java:4.14.0'
+}
+
+// Main class for application
+application {
+    mainClassName = 'demo.App'
+}
+
+// Checkstyle configuration
+checkstyle {
+    toolVersion = '8.45'
+    config = rootProject.resources.text.fromFile('__CRIO__/checkstyle.xml') // Ensure the path is correct
+    sourceSets = [sourceSets.main] // Apply checkstyle to the main source set
+    ignoreFailures = true
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.required = true
+        xml.outputLocation = file("$buildDir/reports/checkstyle/checkstyle-report.xml")
+        html.required = false
+    }
+}
+
+// Test task configuration using TestNG
+test {
+    useTestNG {
+        useDefaultListeners = true // Generate default TestNG reports
+    }
+
+    // Custom test result summary after suite execution
+    afterSuite { desc, result ->
+        if (!desc.parent) {
+            println "\nTEST RESULT: ${result.resultType}"
+            println "TEST SUMMARY: RAN ${result.testCount} TESTS, " +
+                    "${result.successfulTestCount} SUCCEEDED, " +
+                    "${result.failedTestCount} FAILED, " +
+                    "${result.skippedTestCount} SKIPPED"
+        }
+    }
+
+    // Test logging configuration to show detailed output
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED", "STANDARD_OUT", "STANDARD_ERROR"
+        exceptionFormat 'full'
+        showStandardStreams = true
+    }
+
+    outputs.upToDateWhen { false } // Ensures tests always run, even if nothing changes
+}
+
+// Ensure tests run after the project is assembled and cleaned
+tasks.test {
+    dependsOn assemble
+    mustRunAfter clean
+}
