@@ -1,5 +1,6 @@
 package org.demo.PageObjects;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.WebDriver;
@@ -20,15 +21,11 @@ public class MeetingPage {
     }
 
     public void VerifyTheMeetingPage(){
-        String actual="";
+        ArrayList<String> actual= new ArrayList<>();
         for (WebElement ele : MeetingWindowText) {
-             actual= ele.getText();
-            // System.out.println(actual+"--------------");
-            
-            
+            actual.add(ele.getText());
         }
-        System.out.println(actual+"--------------");
-        if(actual.equals("Sit back and relax till others join")){
+        if(actual.contains("Sit back and relax till others join")){
             System.out.println("-----Test Case passed----");
         }else{
 
